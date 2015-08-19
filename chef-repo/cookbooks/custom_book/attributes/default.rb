@@ -13,3 +13,9 @@ default["nginx_config_name"]="home"
 
 # default network to be used
 default["network_address"] = "172.31.11.0"
+
+# overiding default dns hash from dnsmasq cookbook
+default['dnsmasq']['dns'] = {
+  'no-poll' => nil,
+  'server' => '127.0.0.1'
+}

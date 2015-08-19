@@ -24,7 +24,7 @@ address=/<NODE_NAME>.XYZ.in/<PRIVATE IP >
 ```
 
 3. Interfaces file exists, network manager is running and the following config is applied to all Client nodes 
-```
+
  
 ```
 #/etc/network/interfaces
@@ -70,4 +70,3 @@ This chef repo has one cookbook written by name - `custom_book` which does the n
 * Upload the code on chef-server
 * Edit node's run list to run "custom_book::default" recipe
 * Execute the code in node using `sudo chef-client` and it will run the recipes which are needed.
-

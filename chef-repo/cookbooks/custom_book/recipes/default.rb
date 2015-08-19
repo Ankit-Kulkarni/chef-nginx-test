@@ -9,6 +9,18 @@
 # long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 # version          '0.1.0'
 
+# update the sources
+include_recipe 'apt::default'
+
+# update the repository in case of ubuntu
+bash 'apt-update' do
+  user node['root']['user']
+	code <<-EOH
+	 apt-get update
+	 EOH
+end
+
+# ================================= Nginx ==========================================
 # delete the default site nginx configuration symlink to avoid nginx start point chaos
 file '/etc/nginx/sites-enabled/000-default' do
 	owner node['root']['user']
@@ -25,12 +37,12 @@ end
 
 
 # create/check nginx configuration
-template "/etc/nginx/conf.d/#{node['nginx_config_name']}" do
+template "/etc/nginx/conf.d/#{node['nginx_config_name']}.conf"   do
   source "sample_nginx_app.conf.erb"
   owner "#{node['nginx']['user']}"
   group "#{node['nginx']['user']}"
 	# chef Config['node_name'] is set to the node name in chef (it needs to be without domain name )
-  variables( :DOMAIN_NAME => Chef::Config[:node_name] + ".XYZ.com",
+  variables( :DOMAIN_NAME => Chef::Config[:node_name] + node['our_domain'],
              :IP =>  Chef::node["ipaddress"]       )
   mode 0644
   action :create
@@ -46,6 +58,7 @@ service "nginx" do
   action :start
 end
 
+#====================================== Netowkr Interfaces===============================
 # create/check for network interfaces file
 template "/etc/network/interfaces" do
   source "sample_network_interfaces.conf.erb"
@@ -58,16 +71,30 @@ template "/etc/network/interfaces" do
 end
 
 
+
+#============================================ DNSMasq ===================================
+
 # inclding dnsmasq Recipe to install it
 include_recipe 'dnsmasq::default'
+
+# start the dnsmasq service if not started
+service "dnsmasq" do
+  action :start
+end
 
 # create/check/configure dnsmasq configuration
 template "/etc/dnsmasq.conf" do
   source "sample_dnsmasq.conf.erb"
   owner "#{node['root']['user']}"
   group "#{node['root']['user']}"
-  variables( :DOMAIN_NAME => Chef::Config[:node_name],
+
+  variables( :DOMAIN_NAME => Chef::Config[:node_name] + node['our_domain'],
              :IP =>  Chef::node["ipaddress"]       )
   mode 0644
   action :create
+end
+
+# restart the dnsmasq service
+service "dnsmasq" do
+  action :restart
 end

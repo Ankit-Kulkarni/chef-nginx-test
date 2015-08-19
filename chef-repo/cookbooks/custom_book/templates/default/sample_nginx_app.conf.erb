@@ -1,0 +1,12 @@
+server_name <%= @DOMAIN_NAME %> <%= @IP %>;
+
+# uWSGI serving Django.
+
+  	upstream django-zaya-home {
+  	# Distribute requests to servers based on client IP. This keeps load
+  	# balancing fair but consistent per-client. In this instance we're
+  	# only using one uWGSI worker anyway.
+  	ip_hash;
+  	#server unix:///tmp/home-XYZ-uwsgi.sock;
+  	server localhost:8005;
+  	}
